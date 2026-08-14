@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Calculadora de Oro | NEXUM QUANTUM SOCIAL</title>
+
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Precio Oro" />
+  <link rel="icon" href="LOGOFINAL.png" />
+  <link rel="apple-touch-icon" href="LOGOFINAL.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Orbitron:wght@600;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --gold: #D4AF37;
+      --gold-bright: #FFD700;
+      --gold-1: #BF953F;
+      --gold-2: #FCF6BA;
+      --gold-3: #B38728;
+      --gold-4: #FBF5B7;
+      --gold-5: #AA771C;
+      --bg: #050505;
+      --bg-card: #0d0d0d;
+      --bg-input: #171717;
+      --line: rgba(212, 175, 55, 0.28);
+      --line-soft: rgba(212, 175, 55, 0.14);
+      --text: #E0E0E0;
+      --muted: #9a9a9a;
+      --green: #4ade80;
+      --red: #f87171;
+      --gold-gradient: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(212, 175, 55, 0.10), transparent 60%),
+        radial-gradient(800px 500px at 100% 110%, rgba(191, 149, 63, 0.08), transparent 55%),
+        var(--bg);
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(16px, 4vw, 40px);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 40%),
+        var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: clamp(22px, 5vw, 34px);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 24px 60px rgba(0, 0, 0, 0.65),
+        0 0 60px rgba(212, 175, 55, 0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(212, 175, 55, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 175, 55, 0.035) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(circle at 50% 0%, black, transparent 75%);
+      -webkit-mask-image: radial-gradient(circle at 50% 0%, black, transparent 75%);
+      pointer-events: none;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      box-shadow: 0 0 24px rgba(212, 175, 55, 0.2);
+    }
+
+    .title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.35rem, 6vw, 1.8rem);
+      letter-spacing: 1px;
+      line-height: 1.1;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.68rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .field { margin-bottom: 16px; position: relative; }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 7px;
+      font-weight: 600;
+    }
+
+    .input-wrap { position: relative; display: flex; align-items: center; }
+
+    .input-wrap .prefix,
+    .input-wrap .suffix {
+      position: absolute;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      pointer-events: none;
+    }
+    .input-wrap .prefix { left: 15px; }
+    .input-wrap .suffix { right: 15px; }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+      outline: none;
+    }
+    .has-prefix input { padding-left: 34px; }
+    .has-suffix input { padding-right: 40px; }
+
+    input::placeholder { color: #555; font-weight: 400; }
+
+    input[type="text"]:focus {
+      border-color: var(--gold);
+      background: #1c1c1c;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15), 0 0 18px rgba(212, 175, 55, 0.12);
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      margin: 22px 0 20px;
+    }
+
+    .result-block {
+      background: linear-gradient(180deg, rgba(212, 175, 55, 0.07), rgba(212, 175, 55, 0.02));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 20px;
+      text-align: center;
+    }
+
+    .result-label {
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .result-value {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.7rem, 8vw, 2.3rem);
+      line-height: 1.1;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      word-break: break-word;
+    }
+    .result-value .cur {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      vertical-align: middle;
+      -webkit-text-fill-color: var(--muted);
+      color: var(--muted);
+      margin-right: 4px;
+      font-weight: 500;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      font-size: 0.8rem;
+    }
+    .meta-row .k { color: var(--muted); letter-spacing: 0.5px; }
+    .meta-row .v { font-weight: 600; color: var(--text); }
+
+    .profit {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--line-soft);
+      font-size: 0.85rem;
+    }
+    .profit .k { color: var(--muted); letter-spacing: 1px; text-transform: uppercase; font-size: 0.72rem; }
+    .profit .v { font-weight: 700; font-size: 1.05rem; }
+    .profit .v.pos { color: var(--green); }
+    .profit .v.neg { color: var(--red); }
+    .profit .v.zero { color: var(--muted); }
+
+    .foot {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.66rem;
+      letter-spacing: 1px;
+      color: #666;
+    }
+    .foot b { color: var(--gold); font-weight: 600; }
+
+    @media (min-width: 720px) {
+      .card { max-width: 500px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="header">
+      <img class="logo" src="LOGOFINAL.png" alt="NQS Logo"
+           onerror="this.style.display='none'" />
+      <h1 class="title">CALCULADORA DE ORO</h1>
+      <div class="subtitle">Nexum Quantum Social</div>
+    </div>
+
+    <div class="field has-prefix">
+      <label for="compra">Precio de compra (por gramo)</label>
+      <div class="input-wrap">
+        <span class="prefix">$</span>
+        <input id="compra" type="text" inputmode="decimal" autocomplete="off"
+               placeholder="0" data-nav />
+      </div>
+    </div>
+
+    <div class="field has-prefix">
+      <label for="onza">Precio onza (USD)</label>
+      <div class="input-wrap">
+        <span class="prefix">$</span>
+        <input id="onza" type="text" inputmode="decimal" autocomplete="off"
+               placeholder="0" data-nav />
+      </div>
+    </div>
+
+    <div class="field has-prefix">
+      <label for="dolar">Precio dólar (COP)</label>
+      <div class="input-wrap">
+        <span class="prefix">$</span>
+        <input id="dolar" type="text" inputmode="decimal" autocomplete="off"
+               placeholder="0" data-nav />
+      </div>
+    </div>
+
+    <div class="field has-suffix">
+      <label for="porcentaje">Porcentaje de venta</label>
+      <div class="input-wrap">
+        <input id="porcentaje" type="text" inputmode="decimal" autocomplete="off"
+               value="100" data-nav />
+        <span class="suffix">%</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="result-block">
+      <div class="result-label">Resultado · Precio de venta / gramo</div>
+      <div class="result-value"><span class="cur">COP</span><span id="resultado">0.00</span></div>
+
+      <div class="meta-row">
+        <span class="k">Gramo internacional (100%)</span>
+        <span class="v" id="gramoInt">0.00</span>
+      </div>
+    </div>
+
+    <div class="profit">
+      <span class="k">Ganancia (Resultado − Compra)</span>
+      <span class="v zero" id="ganancia">0.00</span>
+    </div>
+
+    <div class="foot">Oro puro · onza troy = <b>31.10375 g</b></div>
+  </main>
+
+  <script>
+    const OUNCE_GRAMS = 31.10375;
+
+    const el = {
+      compra: document.getElementById('compra'),
+      onza: document.getElementById('onza'),
+      dolar: document.getElementById('dolar'),
+      porcentaje: document.getElementById('porcentaje'),
+      resultado: document.getElementById('resultado'),
+      gramoInt: document.getElementById('gramoInt'),
+      ganancia: document.getElementById('ganancia'),
+    };
+
+    // Convierte el texto a número aceptando punto como separador decimal.
+    function num(v) {
+      if (v === null || v === undefined) return NaN;
+      const cleaned = String(v).trim().replace(/\s/g, '').replace(',', '.');
+      if (cleaned === '') return NaN;
+      const n = parseFloat(cleaned);
+      return isFinite(n) ? n : NaN;
+    }
+
+    // Formato: decimales con punto, sin separador de miles.
+    function fmt(n) {
+      if (!isFinite(n)) return '0.00';
+      return (Math.round(n * 100) / 100).toFixed(2);
+    }
+
+    function calcular() {
+      const compra = num(el.compra.value);
+      const onza = num(el.onza.value);
+      const dolar = num(el.dolar.value);
+      let pct = num(el.porcentaje.value);
+      if (!isFinite(pct)) pct = 100;
+
+      const gramoInt = (isFinite(onza) && isFinite(dolar))
+        ? (onza / OUNCE_GRAMS) * dolar
+        : 0;
+
+      const resultado = gramoInt * (pct / 100);
+
+      el.gramoInt.textContent = fmt(gramoInt);
+      el.resultado.textContent = fmt(resultado);
+
+      // Ganancia (solo si hay precio de compra)
+      const g = el.ganancia;
+      if (isFinite(compra) && resultado > 0) {
+        const diff = resultado - compra;
+        g.textContent = (diff > 0 ? '+' : '') + fmt(diff);
+        g.classList.remove('pos', 'neg', 'zero');
+        g.classList.add(diff > 0.0001 ? 'pos' : (diff < -0.0001 ? 'neg' : 'zero'));
+      } else {
+        g.textContent = '0.00';
+        g.classList.remove('pos', 'neg');
+        g.classList.add('zero');
+      }
+    }
+
+    // Enter pasa al siguiente campo
+    const navInputs = Array.from(document.querySelectorAll('[data-nav]'));
+    navInputs.forEach((input, i) => {
+      input.addEventListener('input', calcular);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const next = navInputs[i + 1];
+          if (next) {
+            next.focus();
+            next.select();
+          } else {
+            input.blur();
+          }
+        }
+      });
+      // Al enfocar, selecciona todo para reemplazar rápido
+      input.addEventListener('focus', () => input.select());
+    });
+
+    calcular();
+  </script>
+</body>
+</html>
