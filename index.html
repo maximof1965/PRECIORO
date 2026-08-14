@@ -202,34 +202,50 @@
       text-align: center;
     }
 
-    .result-label {
+    .res-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .res-item + .res-item {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line-soft);
+    }
+
+    .res-label {
       font-size: 0.7rem;
-      letter-spacing: 3px;
+      letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--gold);
       font-weight: 600;
-      margin-bottom: 6px;
     }
 
-    .result-value {
+    .res-num {
       font-family: 'Orbitron', sans-serif;
       font-weight: 800;
-      font-size: clamp(1.7rem, 8vw, 2.3rem);
       line-height: 1.1;
+      word-break: break-word;
+      color: #fff;
+    }
+    .res-num .cur {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.8rem;
+      vertical-align: middle;
+      color: var(--muted);
+      -webkit-text-fill-color: var(--muted);
+      margin-right: 4px;
+      font-weight: 500;
+    }
+
+    .res-compra .res-num { font-size: clamp(1.3rem, 6vw, 1.7rem); }
+
+    .res-venta .res-num {
+      font-size: clamp(1.7rem, 8vw, 2.3rem);
       background: var(--gold-gradient);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      word-break: break-word;
-    }
-    .result-value .cur {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.9rem;
-      vertical-align: middle;
-      -webkit-text-fill-color: var(--muted);
-      color: var(--muted);
-      margin-right: 4px;
-      font-weight: 500;
     }
 
     .meta-row {
@@ -282,12 +298,21 @@
       <div class="subtitle">Precio internacional por gramo</div>
     </div>
 
-    <div class="field has-prefix">
-      <label for="compra">Precio de compra (por gramo)</label>
+    <div class="field has-suffix">
+      <label for="gramos">Cantidad de gramos</label>
       <div class="input-wrap">
-        <span class="prefix">$</span>
-        <input id="compra" type="text" inputmode="decimal" autocomplete="off"
+        <input id="gramos" type="text" inputmode="decimal" autocomplete="off"
                placeholder="0" data-nav data-money />
+        <span class="suffix">g</span>
+      </div>
+    </div>
+
+    <div class="field has-suffix">
+      <label for="pcompra">Porcentaje de compra</label>
+      <div class="input-wrap">
+        <input id="pcompra" type="text" inputmode="decimal" autocomplete="off"
+               placeholder="0" data-nav />
+        <span class="suffix">%</span>
       </div>
     </div>
 
@@ -310,9 +335,9 @@
     </div>
 
     <div class="field has-suffix">
-      <label for="porcentaje">Porcentaje de venta</label>
+      <label for="pventa">Porcentaje de venta</label>
       <div class="input-wrap">
-        <input id="porcentaje" type="text" inputmode="decimal" autocomplete="off"
+        <input id="pventa" type="text" inputmode="decimal" autocomplete="off"
                value="100" data-nav />
         <span class="suffix">%</span>
       </div>
@@ -321,17 +346,23 @@
     <div class="divider"></div>
 
     <div class="result-block">
-      <div class="result-label">Resultado · Precio de venta / gramo</div>
-      <div class="result-value"><span class="cur">COP</span><span id="resultado">0.00</span></div>
+      <div class="res-item res-compra">
+        <span class="res-label">Total compra · se gasta</span>
+        <span class="res-num"><span class="cur">COP</span><span id="totalCompra">0.00</span></span>
+      </div>
+      <div class="res-item res-venta">
+        <span class="res-label">Total venta · ingresa</span>
+        <span class="res-num"><span class="cur">COP</span><span id="totalVenta">0.00</span></span>
+      </div>
 
       <div class="meta-row">
-        <span class="k">Gramo internacional (100%)</span>
+        <span class="k">Precio internacional / gramo (100%)</span>
         <span class="v" id="gramoInt">0.00</span>
       </div>
     </div>
 
     <div class="profit">
-      <span class="k">Ganancia (Resultado − Compra)</span>
+      <span class="k">Ganancia (Venta − Compra)</span>
       <span class="v zero" id="ganancia">0.00</span>
     </div>
 
@@ -342,11 +373,13 @@
     const OUNCE_GRAMS = 31.1035;
 
     const el = {
-      compra: document.getElementById('compra'),
+      gramos: document.getElementById('gramos'),
+      pcompra: document.getElementById('pcompra'),
       onza: document.getElementById('onza'),
       dolar: document.getElementById('dolar'),
-      porcentaje: document.getElementById('porcentaje'),
-      resultado: document.getElementById('resultado'),
+      pventa: document.getElementById('pventa'),
+      totalCompra: document.getElementById('totalCompra'),
+      totalVenta: document.getElementById('totalVenta'),
       gramoInt: document.getElementById('gramoInt'),
       ganancia: document.getElementById('ganancia'),
     };
@@ -393,32 +426,39 @@
     }
 
     function calcular() {
-      const compra = num(el.compra.value);
+      const gramos = num(el.gramos.value);
+      const pctCompra = num(el.pcompra.value);
       const onza = num(el.onza.value);
       const dolar = num(el.dolar.value);
-      let pct = num(el.porcentaje.value);
-      if (!isFinite(pct)) pct = 100;
+      let pctVenta = num(el.pventa.value);
+      if (!isFinite(pctVenta)) pctVenta = 100;
 
+      // Precio internacional por gramo (al 100%)
       const gramoInt = (isFinite(onza) && isFinite(dolar))
         ? (onza / OUNCE_GRAMS) * dolar
         : 0;
 
-      const resultado = gramoInt * (pct / 100);
+      const g = isFinite(gramos) ? gramos : 0;
+      const cCompra = isFinite(pctCompra) ? pctCompra : 0;
+
+      const totalCompra = gramoInt * (cCompra / 100) * g;
+      const totalVenta = gramoInt * (pctVenta / 100) * g;
 
       el.gramoInt.textContent = fmt(gramoInt);
-      el.resultado.textContent = fmt(resultado);
+      el.totalCompra.textContent = fmt(totalCompra);
+      el.totalVenta.textContent = fmt(totalVenta);
 
-      // Ganancia (solo si hay precio de compra)
-      const g = el.ganancia;
-      if (isFinite(compra) && resultado > 0) {
-        const diff = resultado - compra;
-        g.textContent = (diff > 0 ? '+' : '') + fmt(diff);
-        g.classList.remove('pos', 'neg', 'zero');
-        g.classList.add(diff > 0.0001 ? 'pos' : (diff < -0.0001 ? 'neg' : 'zero'));
+      // Ganancia = Total venta − Total compra
+      const gan = el.ganancia;
+      if (totalCompra > 0 || totalVenta > 0) {
+        const diff = totalVenta - totalCompra;
+        gan.textContent = (diff > 0 ? '+' : '') + fmt(diff);
+        gan.classList.remove('pos', 'neg', 'zero');
+        gan.classList.add(diff > 0.0001 ? 'pos' : (diff < -0.0001 ? 'neg' : 'zero'));
       } else {
-        g.textContent = '0.00';
-        g.classList.remove('pos', 'neg');
-        g.classList.add('zero');
+        gan.textContent = '0.00';
+        gan.classList.remove('pos', 'neg');
+        gan.classList.add('zero');
       }
     }
 
