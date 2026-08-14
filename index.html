@@ -287,7 +287,7 @@
       <div class="input-wrap">
         <span class="prefix">$</span>
         <input id="compra" type="text" inputmode="decimal" autocomplete="off"
-               placeholder="0" data-nav />
+               placeholder="0" data-nav data-money />
       </div>
     </div>
 
@@ -296,7 +296,7 @@
       <div class="input-wrap">
         <span class="prefix">$</span>
         <input id="onza" type="text" inputmode="decimal" autocomplete="off"
-               placeholder="0" data-nav />
+               placeholder="0" data-nav data-money />
       </div>
     </div>
 
@@ -305,7 +305,7 @@
       <div class="input-wrap">
         <span class="prefix">$</span>
         <input id="dolar" type="text" inputmode="decimal" autocomplete="off"
-               placeholder="0" data-nav />
+               placeholder="0" data-nav data-money />
       </div>
     </div>
 
@@ -351,19 +351,45 @@
       ganancia: document.getElementById('ganancia'),
     };
 
-    // Convierte el texto a número aceptando punto como separador decimal.
+    // Convierte el texto a número: quita las comas (miles) y usa el punto como decimal.
     function num(v) {
       if (v === null || v === undefined) return NaN;
-      const cleaned = String(v).trim().replace(/\s/g, '').replace(',', '.');
-      if (cleaned === '') return NaN;
+      const cleaned = String(v).replace(/,/g, '').replace(/\s/g, '').trim();
+      if (cleaned === '' || cleaned === '.') return NaN;
       const n = parseFloat(cleaned);
       return isFinite(n) ? n : NaN;
     }
 
-    // Formato: decimales con punto, sin separador de miles.
+    // Formato de salida: miles con coma, decimales con punto (ej. 440,952.89).
     function fmt(n) {
       if (!isFinite(n)) return '0.00';
-      return (Math.round(n * 100) / 100).toFixed(2);
+      return (Math.round(n * 100) / 100).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    // Formatea lo que se escribe en un campo: agrega comas de miles en vivo,
+    // conserva el punto decimal y limita a 2 decimales.
+    function formatMoney(raw) {
+      let v = raw.replace(/[^\d.]/g, '');
+      const firstDot = v.indexOf('.');
+      if (firstDot !== -1) {
+        v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
+      }
+      let intPart = v;
+      let decPart = null;
+      if (v.indexOf('.') !== -1) {
+        const parts = v.split('.');
+        intPart = parts[0];
+        decPart = parts[1].slice(0, 2);
+      }
+      intPart = intPart.replace(/^0+(?=\d)/, '');
+      const grouped = intPart === ''
+        ? (decPart !== null ? '0' : '')
+        : intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      if (decPart !== null) return grouped + '.' + decPart;
+      return grouped;
     }
 
     function calcular() {
@@ -399,7 +425,12 @@
     // Enter pasa al siguiente campo
     const navInputs = Array.from(document.querySelectorAll('[data-nav]'));
     navInputs.forEach((input, i) => {
-      input.addEventListener('input', calcular);
+      input.addEventListener('input', () => {
+        if (input.hasAttribute('data-money')) {
+          input.value = formatMoney(input.value);
+        }
+        calcular();
+      });
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
