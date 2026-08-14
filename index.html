@@ -9,8 +9,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Precio Oro" />
-  <link rel="icon" href="LOGOFINAL.png" />
-  <link rel="apple-touch-icon" href="LOGOFINAL.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -96,13 +94,28 @@
       position: relative;
     }
 
-    .logo {
-      width: 64px;
-      height: 64px;
+    .emblem {
+      width: 66px;
+      height: 66px;
       border-radius: 50%;
-      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border: 1px solid rgba(212, 175, 55, 0.5);
-      box-shadow: 0 0 24px rgba(212, 175, 55, 0.2);
+      background:
+        radial-gradient(circle at 50% 30%, rgba(212, 175, 55, 0.18), transparent 70%),
+        #0d0d0d;
+      box-shadow: 0 0 24px rgba(212, 175, 55, 0.18), inset 0 0 12px rgba(212, 175, 55, 0.08);
+    }
+    .emblem span {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: 1px;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
 
     .title {
@@ -264,8 +277,7 @@
 <body>
   <main class="card">
     <div class="header">
-      <img class="logo" src="LOGOFINAL.png" alt="NQS Logo"
-           onerror="this.style.display='none'" />
+      <div class="emblem" aria-hidden="true"><span>NQS</span></div>
       <h1 class="title">CALCULADORA DE ORO</h1>
       <div class="subtitle">Nexum Quantum Social</div>
     </div>
